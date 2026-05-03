@@ -7,7 +7,7 @@
 
 export interface KeeperHubResult {
   executionId?: string;
-  status: 'pending' | 'success' | 'failed' | 'mocked';
+  status: 'pending' | 'success' | 'failed' | 'mocked' | string;
   txHash?: string;
   gasSaved?: string;
   error?: string;

@@ -6,7 +6,7 @@
  */
 
 export interface ZeroGResult {
-  status: 'pending' | 'success' | 'failed' | 'mocked';
+  status: 'pending' | 'success' | 'failed' | 'mocked' | string;
   merkleRoot?: string;
   txHash?: string;
   error?: string;
