@@ -56,10 +56,21 @@ export async function uploadThreatReport(report: {
     const [tx, err] = await indexer.upload(memData, evmRpc, signer);
     if (err !== null) throw new Error(`Upload error: ${err}`);
 
+    let txHashToReturn = '0xUnknownTxHash';
+    if (tx) {
+        if ('txHash' in tx) {
+            txHashToReturn = tx.txHash as string;
+        } else if ('txHashes' in tx && Array.isArray((tx as any).txHashes) && (tx as any).txHashes.length > 0) {
+            txHashToReturn = (tx as any).txHashes[0];
+        } else if (typeof tx === 'string') {
+            txHashToReturn = tx;
+        }
+    }
+
     return {
       status: 'success',
-      merkleRoot: tree ? tree.root() : '0xUnknownRoot',
-      txHash: tx ? (tx.txHash || tx) : '0xUnknownTxHash'
+      merkleRoot: tree && tree.rootHash() ? tree.rootHash()! : '0xUnknownRoot',
+      txHash: txHashToReturn
     };
   } catch (error: any) {
     console.error('0G Storage upload failed:', error);

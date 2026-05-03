@@ -1,13 +1,14 @@
 import express from "express";
 import cors from "cors";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import { server } from "./lib/agentarc/mcp-server.js";
+import { createAgentArcMcpServer } from "./lib/agentarc/mcp-server.js";
 
 const app = express();
 
 app.use(cors());
 
 let transport: SSEServerTransport;
+const server = createAgentArcMcpServer();
 
 // Endpoint to establish SSE connection
 app.get("/sse", async (req, res) => {

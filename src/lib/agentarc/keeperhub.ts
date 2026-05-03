@@ -34,23 +34,43 @@ export async function submitToKeeperHub(tx: {
   }
 
   try {
-    const endpoint = (!tx.data || tx.data === '0x') 
+    const isTransfer = !tx.data || tx.data === '0x';
+    const endpoint = isTransfer 
       ? 'https://app.keeperhub.com/api/execute/transfer'
       : 'https://app.keeperhub.com/api/execute/contract-call';
+
+    const networkMap: Record<number, string> = {
+      1: 'ethereum',
+      11155111: 'sepolia',
+      8453: 'base',
+      16602: '0g-testnet', // 0G Testnet (Galileo)
+    };
+    const network = networkMap[tx.chainId] || 'ethereum';
+
+    let payload: any = {
+      network,
+      walletId,
+    };
+
+    if (isTransfer) {
+      payload.recipientAddress = tx.to;
+      // Convert wei to standard human readable ETH amount string since KeeperHub API amount expects it
+      payload.amount = tx.value ? (Number(tx.value) / 1e18).toString() : '0';
+    } else {
+      payload.contractAddress = tx.to;
+      payload.data = tx.data; // They might accept raw data or require functionName. Best effort pass for demo.
+      payload.functionName = 'execute'; // Fallback
+      payload.value = tx.value || '0';
+    }
 
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        chainId: tx.chainId,
-        to: tx.to,
-        data: tx.data,
-        value: tx.value,
-        walletId: walletId,
-      }),
+      body: JSON.stringify(payload),
+
     });
 
     if (!response.ok) {

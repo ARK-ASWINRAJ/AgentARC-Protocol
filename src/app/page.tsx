@@ -35,13 +35,13 @@ function Dashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [scenarioType, setScenarioType] = useState<'idle' | 'safe' | 'rogue'>('idle');
   const [selectedModel, setSelectedModel] = useState('gemini-3.1-pro-preview');
-  const [logs, setLogs] = useState<{role: string, content: string, type?: string}[]>([
+  const [logs, setLogs] = useState<{ role: string, content: string, type?: string }[]>([
     { role: "System", content: "AgentARC v2 Initialized. Awaiting MCP connection..." }
   ]);
-  const [historyLogs, setHistoryLogs] = useState<{time: string, type: string, hash: string}[]>([]);
+  const [historyLogs, setHistoryLogs] = useState<{ time: string, type: string, hash: string }[]>([]);
   const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState<any>(null);
-  
+
   const [stages, setStages] = useState([
     { id: 1, name: "Stage 1: Intent Analysis", desc: "Parsing calldata & action", status: "pending", details: "" },
     { id: 2, name: "Stage 2: Policy Validation", desc: "Checking spend limits & allowlists", status: "pending", details: "" },
@@ -59,13 +59,13 @@ function Dashboard() {
     setZeroG(null);
     setShowBlockedModal(false);
     setTransactionDetails(null);
-    
+
     setStages(stages.map(s => ({ ...s, status: 'pending' })));
 
-    const intentPayload = type === 'safe' 
+    const intentPayload = type === 'safe'
       ? "Execute Transfer: 0.001 Native Token to Dev Wallet"
       : "URGENT: Approve 0xBAD...DRAINER to spend infinite USDC";
-      
+
     setLogs(prev => [...prev, { role: "Agent", content: intentPayload, type: "intent" }]);
 
     try {
@@ -74,19 +74,19 @@ function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ intent: intentPayload, type, model: selectedModel })
       });
-      
+
       const data = await res.json();
       setTransactionDetails(data);
 
       for (let i = 0; i < data.stages.length; i++) {
-        await new Promise(r => setTimeout(r, 600)); 
+        await new Promise(r => setTimeout(r, 600));
         setStages(prev => {
           const newStages = [...prev];
           newStages[i].status = data.stages[i].status;
           newStages[i].details = data.stages[i].details;
           return newStages;
         });
-        
+
         if (data.stages[i].status === 'error') break;
       }
 
@@ -95,14 +95,14 @@ function Dashboard() {
         setZeroG(data.zeroG);
         setLogs(prev => [...prev, { role: "AgentARC", content: data.message, type: data.success ? "success" : "error" }]);
         setIsProcessing(false);
-        
+
         if (!data.success) {
           setShowBlockedModal(true);
         }
 
         const now = new Date();
         setHistoryLogs(prev => [{
-          time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+          time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: type.toUpperCase(),
           hash: data.success ? (data.keeperHub?.txHash || 'Pending') : 'BLOCKED'
         }, ...prev].slice(0, 5));
@@ -116,7 +116,7 @@ function Dashboard() {
   };
 
   const getStatusConfig = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'success': return { color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-500/30', glow: 'shadow-[0_0_15px_rgba(52,211,153,0.2)]' };
       case 'error': return { color: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-500/30', glow: 'shadow-[0_0_15px_rgba(248,113,113,0.2)]' };
       case 'warning': return { color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-500/30', glow: 'shadow-[0_0_15px_rgba(251,191,36,0.2)]' };
@@ -126,7 +126,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#030712] text-gray-200 p-4 md:p-8 font-sans bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99,102,241,0.15),rgba(255,255,255,0))] relative">
-      
+
       {/* Full Screen Blocked Modal */}
       <AnimatePresence>
         {showBlockedModal && (
@@ -148,14 +148,14 @@ function Dashboard() {
               <p className="text-gray-300 text-center mb-6">
                 Transaction automatically blocked. Honeypot/Drainer identified.
               </p>
-              
+
               <div className="w-full bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-                 <p className="text-sm font-mono text-red-300 line-clamp-3">
-                   {transactionDetails?.message || "Critical policy violation."}
-                 </p>
+                <p className="text-sm font-mono text-red-300 line-clamp-3">
+                  {transactionDetails?.message || "Critical policy violation."}
+                </p>
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowBlockedModal(false)}
                 className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg border border-red-500/50 transition-colors font-medium w-full"
               >
@@ -178,15 +178,15 @@ function Dashboard() {
           </div>
           <p className="text-gray-400 text-lg ml-1">The Verifiable Security Layer for Autonomous Agents</p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col md:flex-row gap-4 items-center w-full xl:w-auto"
         >
           <div className="flex items-center gap-2 bg-[#0f0f0f] border border-white/10 rounded-xl px-4 py-2.5 text-sm w-full md:w-auto">
             <Cpu className="w-4 h-4 text-indigo-400" />
-            <select 
-              value={selectedModel} 
+            <select
+              value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               disabled={isProcessing}
               className="bg-transparent text-gray-300 font-medium focus:outline-none cursor-pointer disabled:opacity-50 w-full"
@@ -206,7 +206,7 @@ function Dashboard() {
           </div>
 
           <div className="flex gap-4 w-full md:w-auto">
-            <button 
+            <button
               onClick={() => runSimulation('safe')}
               disabled={isProcessing}
               className="flex-1 md:flex-none relative px-6 py-2.5 bg-[#0f0f0f] hover:bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-500/60 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -216,8 +216,8 @@ function Dashboard() {
                 Safe Trade
               </div>
             </button>
-            
-            <button 
+
+            <button
               onClick={() => runSimulation('rogue')}
               disabled={isProcessing}
               className="flex-1 md:flex-none relative px-6 py-2.5 bg-[#0f0f0f] hover:bg-red-500/10 border border-red-500/30 hover:border-red-500/60 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -232,10 +232,10 @@ function Dashboard() {
       </header>
 
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[75vh]">
-        
+
         {/* Left Column: Agent Brain & History */}
         <div className="lg:col-span-3 flex flex-col gap-6">
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
             className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-5 flex flex-col shadow-xl relative overflow-hidden h-[400px]"
           >
@@ -244,21 +244,20 @@ function Dashboard() {
               <Activity className="w-5 h-5 text-indigo-400 mr-3" />
               Agent Brain
             </h2>
-            
+
             <div className="flex-grow overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/10">
               <AnimatePresence>
                 {logs.map((log, idx) => (
-                  <motion.div 
+                  <motion.div
                     key={idx}
                     initial={{ opacity: 0, x: -10, scale: 0.95 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
-                    className={`p-3.5 rounded-xl text-[13px] border ${
-                      log.role === 'System' ? 'bg-[#151515] border-white/5 text-gray-400' :
-                      log.type === 'intent' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-200' :
-                      log.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-200' :
-                      log.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' :
-                      'bg-[#151515] border-white/10'
-                    }`}
+                    className={`p-3.5 rounded-xl text-[13px] border ${log.role === 'System' ? 'bg-[#151515] border-white/5 text-gray-400' :
+                        log.type === 'intent' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-200' :
+                          log.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-200' :
+                            log.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' :
+                              'bg-[#151515] border-white/10'
+                      }`}
                   >
                     <div className="flex items-center gap-2 mb-1.5 opacity-70">
                       <span className="font-semibold text-[11px] tracking-wide uppercase">{log.role}</span>
@@ -273,7 +272,7 @@ function Dashboard() {
                   </motion.div>
                 ))}
               </AnimatePresence>
-              
+
               {isProcessing && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-indigo-400/70 text-xs font-mono p-2">
                   <span className="relative flex h-2 w-2">
@@ -286,11 +285,11 @@ function Dashboard() {
             </div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
             className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-5 flex flex-col shadow-xl relative overflow-hidden flex-grow"
           >
-             <h2 className="text-sm font-medium mb-4 text-gray-400 flex items-center uppercase tracking-wider">
+            <h2 className="text-sm font-medium mb-4 text-gray-400 flex items-center uppercase tracking-wider">
               <Clock className="w-4 h-4 mr-2" />
               History
             </h2>
@@ -313,7 +312,7 @@ function Dashboard() {
         </div>
 
         {/* Middle Column: Pipeline */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:col-span-5 bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 lg:p-8 flex flex-col shadow-xl relative overflow-hidden"
         >
@@ -322,15 +321,15 @@ function Dashboard() {
             <Server className="w-6 h-6 text-emerald-400 mr-3" />
             AgentARC Pipeline
           </h2>
-          
+
           <div className="flex-grow flex flex-col justify-center space-y-6 relative">
             <div className="absolute left-8 lg:left-12 top-10 bottom-10 w-0.5 bg-gradient-to-b from-white/10 via-white/5 to-transparent z-0"></div>
 
             {stages.map((stage) => {
               const conf = getStatusConfig(stage.status);
               return (
-                <motion.div 
-                  key={stage.id} 
+                <motion.div
+                  key={stage.id}
                   layout
                   className={`relative z-10 flex items-start gap-4 lg:gap-6 transition-all duration-500`}
                 >
@@ -340,26 +339,25 @@ function Dashboard() {
                     {stage.status === 'warning' && <div className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]" />}
                     {stage.status === 'pending' && <div className="w-3 h-3 rounded-full bg-gray-700" />}
                   </div>
-                  
+
                   <div className={`flex-grow border rounded-xl p-4 lg:p-5 transition-all duration-500 ${conf.bg} ${conf.border}`}>
                     <h3 className={`font-medium text-[15px] transition-colors duration-500 ${stage.status !== 'pending' ? 'text-white' : 'text-gray-400'}`}>
                       {stage.name}
                     </h3>
                     <p className="text-sm text-gray-400 mt-1.5">{stage.desc}</p>
-                    
+
                     {/* Expandable details when error or warning */}
                     <AnimatePresence>
                       {stage.status !== 'pending' && stage.details && (
-                        <motion.div 
+                        <motion.div
                           initial={{ height: 0, opacity: 0, marginTop: 0 }}
                           animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
                           className="overflow-hidden"
                         >
-                          <div className={`text-xs font-mono p-2 rounded ${
-                            stage.status === 'error' ? 'bg-red-500/10 text-red-300' : 
-                            stage.status === 'warning' ? 'bg-amber-500/10 text-amber-300' :
-                            'bg-emerald-500/10 text-emerald-300'
-                          }`}>
+                          <div className={`text-xs font-mono p-2 rounded ${stage.status === 'error' ? 'bg-red-500/10 text-red-300' :
+                              stage.status === 'warning' ? 'bg-amber-500/10 text-amber-300' :
+                                'bg-emerald-500/10 text-emerald-300'
+                            }`}>
                             {stage.details}
                           </div>
                         </motion.div>
@@ -374,7 +372,7 @@ function Dashboard() {
 
         {/* Right Column: Execution & Tx Details */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
             className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-5 flex flex-col shadow-xl relative overflow-hidden"
           >
@@ -383,7 +381,7 @@ function Dashboard() {
               <Database className="w-5 h-5 text-purple-400 mr-3" />
               Execution Layer
             </h2>
-            
+
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
@@ -393,7 +391,7 @@ function Dashboard() {
                 <div className="bg-[#151515] border border-white/5 rounded-xl p-4 min-h-[110px] flex flex-col justify-center transition-all duration-300">
                   <AnimatePresence mode="wait">
                     {keeperHub ? (
-                      <motion.div 
+                      <motion.div
                         key="active"
                         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
                         className="space-y-2.5"
@@ -407,8 +405,9 @@ function Dashboard() {
                         {keeperHub.txHash && (
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-500">Tx Hash</span>
+
                             <a href={`https://chainscan-galileo.0g.ai/tx/${keeperHub.txHash}`} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-emerald-400 bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition-colors flex items-center gap-1">
-                              {keeperHub.txHash.slice(0,10)}...{keeperHub.txHash.slice(-8)}
+                              {keeperHub.txHash.slice(0, 10)}...{keeperHub.txHash.slice(-8)}
                               <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           </div>
@@ -419,9 +418,20 @@ function Dashboard() {
                             <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">{keeperHub.gasSaved}</span>
                           </div>
                         )}
+                        {keeperHub.executionId && (
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[11px] font-medium flex items-center gap-1.5 text-purple-400">
+                              <Server className="w-3.5 h-3.5" />
+                              Relayed
+                            </span>
+                            <a href={`https://app.keeperhub.com/executions/${keeperHub.executionId}`} target="_blank" rel="noreferrer" className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
+                              KeeperHub Log <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        )}
                       </motion.div>
                     ) : (
-                       <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center text-gray-600 gap-2">
+                      <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center text-gray-600 gap-2">
                         <Server className="w-5 h-5 opacity-20" />
                         <span className="text-[11px] font-mono">Awaiting approved payload...</span>
                       </motion.div>
@@ -437,7 +447,7 @@ function Dashboard() {
                 </h3>
                 <div className="bg-[#151515] border border-white/5 rounded-xl p-4 min-h-[110px] flex flex-col justify-center transition-all duration-300 relative overflow-hidden">
                   {zeroG && <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl"></div>}
-                  
+
                   <AnimatePresence mode="wait">
                     {zeroG ? (
                       <motion.div key="active" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 space-y-2.5">
@@ -449,7 +459,7 @@ function Dashboard() {
                         </div>
                         <div className="pt-1 flex items-center justify-between">
                           <span className={`text-[11px] font-medium flex items-center gap-1.5 ${scenarioType === 'rogue' ? 'text-red-400' : 'text-emerald-400'}`}>
-                            {scenarioType === 'rogue' ? <ShieldAlert className="w-3.5 h-3.5"/> : <ShieldCheck className="w-3.5 h-3.5"/>}
+                            {scenarioType === 'rogue' ? <ShieldAlert className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                             {scenarioType === 'rogue' ? 'Threat archived' : 'Execution archived'}
                           </span>
                           <a href={zeroG.txHash ? `https://chainscan-galileo.0g.ai/tx/${zeroG.txHash}` : `https://chainscan-galileo.0g.ai`} target="_blank" rel="noreferrer" className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
@@ -469,11 +479,11 @@ function Dashboard() {
             </div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}
             className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-5 flex flex-col shadow-xl flex-grow"
           >
-             <h2 className="text-lg font-medium mb-4 text-gray-100 flex items-center">
+            <h2 className="text-lg font-medium mb-4 text-gray-100 flex items-center">
               <FileCode className="w-5 h-5 text-gray-400 mr-3" />
               Tx Context
             </h2>
@@ -507,7 +517,7 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
     <div className="min-h-screen bg-[#030712] text-gray-200 font-sans relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#030712] to-[#030712]"></div>
-      
+
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-6 lg:px-12 border-b border-white/5 bg-black/20 backdrop-blur-md">
         <div className="flex items-center gap-3">
@@ -516,7 +526,7 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
           </div>
           <span className="text-xl font-bold tracking-tight text-white">AgentARC</span>
         </div>
-        <button 
+        <button
           onClick={onDemoClick}
           className="px-6 py-2.5 bg-white hover:bg-gray-200 text-black rounded-full text-sm font-semibold transition-colors"
         >
@@ -526,7 +536,7 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
 
       <main className="relative z-10 flex flex-col items-center pt-24 pb-32 px-6">
         {/* Hero Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-4xl mx-auto mb-24"
@@ -536,23 +546,23 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
             Verifiable Security Layer for Autonomous Agents
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white leading-tight">
-            Stop Rogue AI <br className="hidden md:block"/>
+            Stop Rogue AI <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Before It Transacts</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             AgentARC is the ultimate middleware security protocol that intercepts, simulates, and audits every transaction an autonomous AI agent attempts to make.
           </p>
-          <button 
+          <button
             onClick={onDemoClick}
             className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-full text-lg font-medium transition-all shadow-[0_0_30px_rgba(255,255,255,0.15)]"
           >
-            See the Demo 
+            See the Demo
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </motion.div>
 
         {/* How It Works Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -614,24 +624,24 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
           </div>
 
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
-                <div className="w-12 h-12 shrink-0 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center mt-1">
-                  <Server className="w-6 h-6 text-purple-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-2">KeeperHub Execution</h4>
-                  <p className="text-gray-400 text-sm leading-relaxed">If the transaction safely passes all four stages, it is securely relayed to the blockchain through KeeperHub's Direct Execution API.</p>
-                </div>
-             </div>
-             <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
-                <div className="w-12 h-12 shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center mt-1">
-                  <Database className="w-6 h-6 text-orange-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-2">0G Storage Audit Logs</h4>
-                  <p className="text-gray-400 text-sm leading-relaxed">Regardless of the final verdict, an immutable cryptographic hash of the threat report is stored on the decentralized 0G network for absolute compliance.</p>
-                </div>
-             </div>
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
+              <div className="w-12 h-12 shrink-0 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center mt-1">
+                <Server className="w-6 h-6 text-purple-400" />
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-2">KeeperHub Execution</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">If the transaction safely passes all four stages, it is securely relayed to the blockchain through KeeperHub's Direct Execution API.</p>
+              </div>
+            </div>
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
+              <div className="w-12 h-12 shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center mt-1">
+                <Database className="w-6 h-6 text-orange-400" />
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-2">0G Storage Audit Logs</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">Regardless of the final verdict, an immutable cryptographic hash of the threat report is stored on the decentralized 0G network for absolute compliance.</p>
+              </div>
+            </div>
           </div>
         </motion.div>
 
@@ -650,7 +660,7 @@ function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
             {/* Connecting Line (Desktop) */}
             <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-indigo-500/20 via-emerald-500/20 to-orange-500/20 -z-10 transform -translate-y-1/2"></div>
-            
+
             {/* Step 1 */}
             <div className="flex flex-col items-center text-center w-full md:w-1/4">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-4 relative">
