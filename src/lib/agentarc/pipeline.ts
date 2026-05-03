@@ -58,7 +58,7 @@ export interface PipelineResult {
  */
 export async function runPipeline(
   tx: any, 
-  model: string = 'gemini-3.1-pro'
+  model: string = 'gemini-3.1-pro-preview'
 ): Promise<PipelineResult> {
   // --- Stage 1: Intent Analysis ---
   const intentResult = analyzeIntent(tx);

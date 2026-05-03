@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
 const googleAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
-export async function detectThreatLLM(txDetails: any, warnings: string[], modelChoice: string = 'gemini-3.1-pro') {
+export async function detectThreatLLM(txDetails: any, warnings: string[], modelChoice: string = 'gemini-3.1-pro-preview') {
   const prompt = `
 You are the AgentARC Security Core, an expert Web3 security auditor.
 Analyze the following proposed blockchain transaction requested by an autonomous AI agent.

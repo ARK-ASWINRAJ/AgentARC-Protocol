@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, ShieldCheck, Activity, Database, Server, ChevronRight, Zap, Cpu, FileCode, Clock, ExternalLink } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Activity, Database, Server, ChevronRight, Zap, Cpu, FileCode, Clock, ExternalLink, ArrowRight, Lock, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Typewriter component for the "Agent Thinking" animation
@@ -31,10 +31,10 @@ const TypewriterText = ({ text, delay = 0, speed = 30 }: { text: string, delay?:
   return <span>{displayedText}</span>;
 };
 
-export default function Dashboard() {
+function Dashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [scenarioType, setScenarioType] = useState<'idle' | 'safe' | 'rogue'>('idle');
-  const [selectedModel, setSelectedModel] = useState('gemini-3.1-pro');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.1-pro-preview');
   const [logs, setLogs] = useState<{role: string, content: string, type?: string}[]>([
     { role: "System", content: "AgentARC v2 Initialized. Awaiting MCP connection..." }
   ]);
@@ -63,7 +63,7 @@ export default function Dashboard() {
     setStages(stages.map(s => ({ ...s, status: 'pending' })));
 
     const intentPayload = type === 'safe' 
-      ? "Execute Swap: 50 USDC -> WETH (Uniswap V3)"
+      ? "Execute Transfer: 0.001 Native Token to Dev Wallet"
       : "URGENT: Approve 0xBAD...DRAINER to spend infinite USDC";
       
     setLogs(prev => [...prev, { role: "Agent", content: intentPayload, type: "intent" }]);
@@ -192,7 +192,7 @@ export default function Dashboard() {
               className="bg-transparent text-gray-300 font-medium focus:outline-none cursor-pointer disabled:opacity-50 w-full"
             >
               <optgroup label="Google Models" className="bg-[#0a0a0a]">
-                <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
+                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
                 <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
               </optgroup>
               <optgroup label="Anthropic Models" className="bg-[#0a0a0a]">
@@ -407,7 +407,10 @@ export default function Dashboard() {
                         {keeperHub.txHash && (
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-500">Tx Hash</span>
-                            <span className="text-[11px] font-mono text-gray-300 bg-white/5 px-2 py-1 rounded">{keeperHub.txHash.slice(0,10)}...{keeperHub.txHash.slice(-8)}</span>
+                            <a href={`https://chainscan-galileo.0g.ai/tx/${keeperHub.txHash}`} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-emerald-400 bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition-colors flex items-center gap-1">
+                              {keeperHub.txHash.slice(0,10)}...{keeperHub.txHash.slice(-8)}
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
                           </div>
                         )}
                         {keeperHub.gasSaved && (
@@ -449,8 +452,8 @@ export default function Dashboard() {
                             {scenarioType === 'rogue' ? <ShieldAlert className="w-3.5 h-3.5"/> : <ShieldCheck className="w-3.5 h-3.5"/>}
                             {scenarioType === 'rogue' ? 'Threat archived' : 'Execution archived'}
                           </span>
-                          <a href="#" className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
-                            Explorer <ExternalLink className="w-3 h-3" />
+                          <a href={zeroG.txHash ? `https://chainscan-galileo.0g.ai/tx/${zeroG.txHash}` : `https://chainscan-galileo.0g.ai`} target="_blank" rel="noreferrer" className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
+                            0G Explorer <ExternalLink className="w-3 h-3" />
                           </a>
                         </div>
                       </motion.div>
@@ -497,4 +500,210 @@ export default function Dashboard() {
       </main>
     </div>
   );
+}
+
+function LandingPage({ onDemoClick }: { onDemoClick: () => void }) {
+  return (
+    <div className="min-h-screen bg-[#030712] text-gray-200 font-sans relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#030712] to-[#030712]"></div>
+      
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between p-6 lg:px-12 border-b border-white/5 bg-black/20 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+            <Zap className="w-5 h-5 text-emerald-400" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-white">AgentARC</span>
+        </div>
+        <button 
+          onClick={onDemoClick}
+          className="px-6 py-2.5 bg-white hover:bg-gray-200 text-black rounded-full text-sm font-semibold transition-colors"
+        >
+          See the Demo
+        </button>
+      </nav>
+
+      <main className="relative z-10 flex flex-col items-center pt-24 pb-32 px-6">
+        {/* Hero Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-4xl mx-auto mb-24"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-8">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Verifiable Security Layer for Autonomous Agents
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white leading-tight">
+            Stop Rogue AI <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Before It Transacts</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            AgentARC is the ultimate middleware security protocol that intercepts, simulates, and audits every transaction an autonomous AI agent attempts to make.
+          </p>
+          <button 
+            onClick={onDemoClick}
+            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-full text-lg font-medium transition-all shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+          >
+            See the Demo 
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </motion.div>
+
+        {/* How It Works Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="w-full max-w-6xl mx-auto"
+        >
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-white mb-4">How AgentARC Works</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">A robust 4-stage pipeline ensuring your smart contracts remain safe from hallucinating or malicious AI agents.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 1 */}
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors"></div>
+              <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center mb-6">
+                <Cpu className="w-6 h-6 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">1. Intent Analysis</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                The MCP server intercepts the raw transaction calldata generated by the AI agent and statically analyzes its true intent (e.g., ERC20 transfer, DEX swap).
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors"></div>
+              <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-6">
+                <Lock className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">2. Policy Validation</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                We check the transaction against hardcoded organizational limits. Are they spending too much? Is the target contract a known honeypot?
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors"></div>
+              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-6">
+                <Activity className="w-6 h-6 text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">3. RPC Simulation</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                The payload is simulated using `ethers.js` against a public Ethereum node. If the transaction would revert, AgentARC catches the error before gas is wasted.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-red-500/30 transition-colors">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl group-hover:bg-red-500/10 transition-colors"></div>
+              <div className="w-12 h-12 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center mb-6">
+                <ShieldAlert className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">4. Threat Detection</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                All context is fed into an LLM (Gemini/Claude) which acts as the ultimate security auditor, looking for sophisticated phishing or logical exploits.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
+                <div className="w-12 h-12 shrink-0 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center mt-1">
+                  <Server className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-2">KeeperHub Execution</h4>
+                  <p className="text-gray-400 text-sm leading-relaxed">If the transaction safely passes all four stages, it is securely relayed to the blockchain through KeeperHub's Direct Execution API.</p>
+                </div>
+             </div>
+             <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
+                <div className="w-12 h-12 shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center mt-1">
+                  <Database className="w-6 h-6 text-orange-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-2">0G Storage Audit Logs</h4>
+                  <p className="text-gray-400 text-sm leading-relaxed">Regardless of the final verdict, an immutable cryptographic hash of the threat report is stored on the decentralized 0G network for absolute compliance.</p>
+                </div>
+             </div>
+          </div>
+        </motion.div>
+
+        {/* The Architecture Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="w-full max-w-5xl mx-auto mt-24"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">The AgentARC Flow</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">From an AI's intent to final immutable execution.</p>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+            {/* Connecting Line (Desktop) */}
+            <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-indigo-500/20 via-emerald-500/20 to-orange-500/20 -z-10 transform -translate-y-1/2"></div>
+            
+            {/* Step 1 */}
+            <div className="flex flex-col items-center text-center w-full md:w-1/4">
+              <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-4 relative">
+                <Cpu className="w-8 h-8 text-indigo-400" />
+                <div className="absolute -bottom-2 -right-2 bg-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-full">AI</div>
+              </div>
+              <h4 className="font-semibold text-white mb-1">Agent Request</h4>
+              <p className="text-xs text-gray-400">AI attempts to send funds or call a contract via MCP.</p>
+            </div>
+
+            <ChevronRight className="w-6 h-6 text-gray-600 hidden md:block" />
+            <div className="w-0.5 h-6 bg-gray-800 md:hidden my-2"></div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center text-center w-full md:w-1/4">
+              <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                <ShieldCheck className="w-8 h-8 text-cyan-400" />
+              </div>
+              <h4 className="font-semibold text-white mb-1">AgentARC Pipeline</h4>
+              <p className="text-xs text-gray-400">Intercepts, simulates, and LLM-audits the payload.</p>
+            </div>
+
+            <ChevronRight className="w-6 h-6 text-gray-600 hidden md:block" />
+            <div className="w-0.5 h-6 bg-gray-800 md:hidden my-2"></div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center text-center w-full md:w-1/4">
+              <div className="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-4">
+                <Server className="w-8 h-8 text-purple-400" />
+              </div>
+              <h4 className="font-semibold text-white mb-1">KeeperHub Relay</h4>
+              <p className="text-xs text-gray-400">Secure execution to the blockchain (if approved).</p>
+            </div>
+
+            <ChevronRight className="w-6 h-6 text-gray-600 hidden md:block" />
+            <div className="w-0.5 h-6 bg-gray-800 md:hidden my-2"></div>
+
+            {/* Step 4 */}
+            <div className="flex flex-col items-center text-center w-full md:w-1/4">
+              <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-4">
+                <Database className="w-8 h-8 text-orange-400" />
+              </div>
+              <h4 className="font-semibold text-white mb-1">0G Storage Audit</h4>
+              <p className="text-xs text-gray-400">Cryptographic hash posted for immutable compliance.</p>
+            </div>
+          </div>
+        </motion.div>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  const [showDemo, setShowDemo] = useState(false);
+  return showDemo ? <Dashboard /> : <LandingPage onDemoClick={() => setShowDemo(true)} />;
 }

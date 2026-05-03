@@ -45,7 +45,7 @@ export function createAgentArcMcpServer(): McpServer {
       calldata: z.string().describe('The encoded function call data (0x-prefixed hex string)'),
       value: z.string().optional().describe('Optional ETH value to send in wei (default: "0")'),
       chain: z.string().optional().describe('Target chain (default: "ethereum"). Supports: ethereum, sepolia, base'),
-      model: z.string().optional().describe('LLM model for threat detection. Options: gemini-3.1-pro, claude-3-5-sonnet-20241022, mock'),
+      model: z.string().optional().describe('LLM model for threat detection. Options: gemini-3.1-pro-preview, claude-3-5-sonnet-20241022, mock'),
     },
     async (args) => {
       try {
@@ -55,7 +55,7 @@ export function createAgentArcMcpServer(): McpServer {
           value: args.value || '0',
           chainId: args.chain === 'sepolia' ? 11155111 : args.chain === 'base' ? 8453 : 1,
         };
-        const model = args.model || 'gemini-3.1-pro';
+        const model = args.model || 'gemini-3.1-pro-preview';
 
         const result = await runPipeline(tx, model);
 

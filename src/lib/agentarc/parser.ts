@@ -27,6 +27,14 @@ export function analyzeIntent(tx: { to: string, data: string }) {
   let parsed: any = { type: 'unknown', details: null };
   let description = "Unknown transaction";
 
+  if (!tx.data || tx.data === '0x') {
+    return {
+      parsed: { type: 'transfer', value: 'native' },
+      description: "Native Token Transfer",
+      success: true
+    };
+  }
+
   try {
     const erc20Tx = erc20Interface.parseTransaction(tx);
     if (erc20Tx) {

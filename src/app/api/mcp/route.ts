@@ -8,23 +8,11 @@ import { runPipeline } from '@/lib/agentarc/pipeline';
  */
 function getMockPayload(type: string) {
   if (type === 'safe') {
-    const uniIface = new Interface([
-      'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)',
-    ]);
-    const data = uniIface.encodeFunctionData('swapExactTokensForTokens', [
-      50000000,
-      0,
-      [
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-      ],
-      '0x1234567890123456789012345678901234567890',
-      1900000000,
-    ]);
     return {
-      to: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-      data: data,
-      chainId: 1,
+      to: '0x1111111111111111111111111111111111111111',
+      data: '0x',
+      value: '1000000000000000', // 0.001 Native Token
+      chainId: 16602, // 0G Testnet
     };
   } else {
     const erc20Iface = new Interface([
@@ -49,7 +37,7 @@ function getMockPayload(type: string) {
  *
  * Request body:
  *   - type: 'safe' | 'rogue' (selects demo payload)
- *   - model: 'gemini-3.1-pro' | 'claude-3-5-sonnet-20241022' | 'mock' (LLM for Stage 4)
+ *   - model: 'gemini-3.1-pro-preview' | 'claude-3-5-sonnet-20241022' | 'mock' (LLM for Stage 4)
  *
  * This API route runs the SAME pipeline code that the MCP Server exposes
  * via the `execute_secure_transaction` tool — ensuring 1:1 parity.
@@ -62,7 +50,7 @@ export async function POST(request: Request) {
     const txPayload = getMockPayload(type);
 
     // Run the full 4-stage pipeline (shared with MCP server)
-    const result = await runPipeline(txPayload, model || 'gemini-3.1-pro');
+    const result = await runPipeline(txPayload, model || 'gemini-3.1-pro-preview');
 
     if (result.approved) {
       return NextResponse.json({
