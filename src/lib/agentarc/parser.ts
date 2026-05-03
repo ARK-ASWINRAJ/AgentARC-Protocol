@@ -19,7 +19,8 @@ export const POLICIES = {
     "0xbad0000000000000000000000000000000000000" // Updated to valid hex
   ],
   ALLOWLISTED_PROTOCOLS: [
-    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D".toLowerCase() // Uniswap V2 Router
+    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D".toLowerCase(), // Uniswap V2 Router
+    "0x1111111111111111111111111111111111111111" // Dev Wallet for demo
   ]
 };
 

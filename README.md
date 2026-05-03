@@ -58,7 +58,7 @@ If the transaction is safe, it's routed to **KeeperHub** for guaranteed executio
 1. **Intent Analysis:** Decodes raw EVM calldata into human-readable function calls using ABIs.
 2. **Policy Validation:** Checks the parsed action against configurable rules (spend limits, denylists, allowlists).
 3. **Transaction Simulation:** Simulates the transaction using `ethers.js` against a public RPC to check for reverts or unexpected token drainage.
-4. **LLM Threat Detection:** A secondary security LLM (e.g. Gemini 1.5 Pro, Claude 3.5 Sonnet) acts as an auditor to analyze the context for honeypots or drainers.
+4. **LLM Threat Detection:** A secondary security LLM (e.g. Gemini 3.1 Pro Preview, Claude 3.5 Sonnet) acts as an auditor to analyze the context for honeypots or drainers.
 
 ## Sponsor Integrations
 

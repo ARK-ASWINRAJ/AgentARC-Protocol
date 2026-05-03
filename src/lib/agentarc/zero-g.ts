@@ -58,8 +58,8 @@ export async function uploadThreatReport(report: {
 
     return {
       status: 'success',
-      merkleRoot: tree?.rootHash() || ('rootHash' in tx ? tx.rootHash : tx.rootHashes[0]),
-      txHash: 'txHash' in tx ? tx.txHash : tx.txHashes[0]
+      merkleRoot: tree ? tree.root() : '0xUnknownRoot',
+      txHash: tx ? (tx.txHash || tx) : '0xUnknownTxHash'
     };
   } catch (error: any) {
     console.error('0G Storage upload failed:', error);
